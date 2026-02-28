@@ -27,8 +27,20 @@ export default function Footer() {
                     </div>
                     <div>
                         <div style={{ fontWeight: 700, marginBottom: 12, color: 'var(--muted)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Agent Stack</div>
-                        {['🔍 Inspector Agent', '🔩 Parts Agent', '🛡️ Safety Agent', '📋 Advisor Agent', '🧠 Memory Agent'].map(a => (
+                        {['🔍 Inspector Agent', '🔩 Parts Agent', '🛡️ Safety Agent', '📋 Advisor Agent', '🗺️ Site Planner'].map(a => (
                             <div key={a} style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 6 }}>{a}</div>
+                        ))}
+                    </div>
+                    <div>
+                        <div style={{ fontWeight: 700, marginBottom: 12, color: 'var(--muted)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Sponsors & Tech</div>
+                        {[
+                            'Cloudflare (Workers, D1, R2, KV)',
+                            'OpenAI GPT-4o (Vision/Voice)',
+                            'Supermemory (Memory Agent)',
+                            'Capital One Nessie (Cost Tracking)',
+                            'Solana (Blockchain Verification)'
+                        ].map(a => (
+                            <div key={a} style={{ color: 'var(--brand)', fontSize: 13, marginBottom: 6, fontWeight: 600 }}>{a}</div>
                         ))}
                     </div>
                 </div>

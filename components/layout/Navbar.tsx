@@ -41,6 +41,7 @@ export default function Navbar() {
         { href: '/parts', label: t('nav.parts') },
         { href: '/fleet', label: t('nav.fleet') },
         { href: '/cab', label: t('nav.cab') },
+        { href: '/site', label: 'Site Plan' },
         { href: '/impact', label: t('nav.impact') },
     ]
 
