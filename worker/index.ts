@@ -61,12 +61,24 @@ MACHINE HISTORY: ${history || 'No previous inspection history.'}
 
 CAT PARTS: 1R-0750 Engine Oil Filter, 326-1643 Hydraulic Filter, 175-2949 Air Filter, 6V-4965 Hydraulic Seal Kit, 6Y-3222 Bucket Tooth, 8E-6252 Tooth Adapter, 5P-0960 O-Ring Seal, 2J-3506 Track Bolt
 
-RETURN ONLY VALID JSON:
+RETURN ONLY VALID JSON MATCHING THIS EXACT HYBRID DATASET STRUCTURE:
 {
-  "assessment": { "status": "GO|CAUTION|NO-GO", "confidence": 0-100, "component_name": "string", "finding": "one clear sentence", "severity": "none|low|medium|high|critical" },
-  "details": { "observations": ["string"], "affected_area": "string", "estimated_wear_percent": 0-100, "time_to_failure": "string or null" },
-  "action": { "immediate": "string", "recommended": "string", "parts_needed": [{ "part_number": "string", "part_name": "string", "quantity": 1, "urgency": "immediate|scheduled|preventive", "order_url": "https://parts.cat.com/en/catcorp" }], "estimated_repair_cost": "string", "downtime_estimate": "string" },
-  "proactive": { "next_service_due": "string", "related_checks": ["string"], "operator_coaching": "string", "order_parts_now": true, "weather_factor": true, "weather_note": "string" }
+  "assessment": { "status": "GO|CAUTION|NO-GO", "confidence": 0-100, "overall_finding": "Summary of the component's state" },
+  "anomalies": [
+    {
+      "component_location": "string (e.g., Upper Step, Hydraulic Cylinder Mounting, Coolant Reservoir)",
+      "component_type": "string (e.g., Step, Hose, Glass, Mounting System)",
+      "condition_description": "string (Detailed description of observed condition or failure)",
+      "safety_impact_assessment": "string (Critical/Moderate/None - personnel safety risks)",
+      "visibility_impact": "string (Effect on operator visibility)",
+      "operational_impact": "string (Effect on equipment access/maintenance)",
+      "recommended_action": "string (Immediate repair, scheduled maintenance, clean, etc.)",
+      "severity": "Critical|Major|Minor",
+      "risk_level": "None|Low|Moderate|Critical"
+    }
+  ],
+  "action": { "immediate": "string", "parts_needed": [{ "part_number": "string", "part_name": "string", "quantity": 1 }], "estimated_repair_cost": "string" },
+  "proactive": { "next_service_due": "string", "weather_note": "string" }
 }`
 
 const AR_SYSTEM_PROMPT = `You are FieldMind AR Vision Agent. Analyze this image of construction/lifting equipment.
@@ -170,19 +182,37 @@ export default {
                     body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'system', content: SYSTEM_PROMPT(lang, weatherCtx, history) }, ...messages], max_tokens: 1000, response_format: { type: 'json_object' } })
                 })
                 const aiData: any = await aiRes.json()
-                let result: any = { assessment: { status: 'CAUTION', confidence: 50, component_name: body.component_name, finding: 'Manual inspection recommended.', severity: 'low' }, details: { observations: [], affected_area: '', estimated_wear_percent: 0, time_to_failure: null }, action: { immediate: 'Inspect manually', recommended: 'Re-photograph', parts_needed: [], estimated_repair_cost: 'TBD', downtime_estimate: 'TBD' }, proactive: { next_service_due: 'Check manual', related_checks: [], operator_coaching: '', order_parts_now: false, weather_factor: false, weather_note: '' } }
+                let result: any = { assessment: { status: 'CAUTION', confidence: 50, overall_finding: 'Manual inspection recommended.' }, anomalies: [], action: { immediate: 'Inspect manually', parts_needed: [], estimated_repair_cost: 'TBD' }, proactive: { next_service_due: 'Check manual', weather_note: '' } }
                 try { result = JSON.parse(aiData.choices[0].message.content) } catch { }
 
                 const compId = id(), now = new Date().toISOString()
-                const status = result.assessment?.status
+                const status = result.assessment?.status || 'CAUTION'
+
+                // Map the new anomalies structure into a readable finding for the frontend
+                const finding = result.assessment?.overall_finding || (result.anomalies?.[0]?.condition_description || 'Condition unknown')
+                const observations = (result.anomalies || []).map((a: any) => `${a.component_location} (${a.severity}): ${a.condition_description} Action: ${a.recommended_action}`)
+
+                const dbResultDetails = {
+                    observations,
+                    affected_area: result.anomalies?.[0]?.component_location || 'General',
+                    safety_impact: result.anomalies?.[0]?.safety_impact_assessment || 'Unknown'
+                }
+
                 await env.DB.prepare(`INSERT INTO components (id,inspection_id,component_name,section_name,section_order,status,confidence,finding,voice_note,ai_response,parts_needed,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`)
-                    .bind(compId, inspId, body.component_name, body.section_name || 'General', body.section_order || 0, status, result.assessment?.confidence || 50, result.assessment?.finding || '', body.voice_note || '', JSON.stringify(result), JSON.stringify(result.action?.parts_needed || []), now).run()
+                    .bind(compId, inspId, body.component_name, body.section_name || 'General', body.section_order || 0, status, result.assessment?.confidence || 50, finding, body.voice_note || '', JSON.stringify(result), JSON.stringify(result.action?.parts_needed || []), now).run()
 
                 if (status === 'GO') await env.DB.prepare('UPDATE inspections SET go_count=go_count+1 WHERE id=?').bind(inspId).run()
                 else if (status === 'CAUTION') await env.DB.prepare('UPDATE inspections SET caution_count=caution_count+1 WHERE id=?').bind(inspId).run()
                 else if (status === 'NO-GO') await env.DB.prepare('UPDATE inspections SET nogo_count=nogo_count+1 WHERE id=?').bind(inspId).run()
 
-                return json({ id: compId, inspection_id: inspId, status, confidence: result.assessment?.confidence, finding: result.assessment?.finding, details: result.details, action: result.action, proactive: result.proactive }, 201)
+                return json({
+                    id: compId, inspection_id: inspId, status,
+                    confidence: result.assessment?.confidence,
+                    finding: finding,
+                    details: dbResultDetails,
+                    action: result.action,
+                    proactive: result.proactive
+                }, 201)
             }
 
             // Complete inspection
