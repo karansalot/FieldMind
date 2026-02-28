@@ -1,0 +1,126 @@
+{
+    "nav": {
+        "inspect": "Inspect",
+        "parts": "Parts",
+        "fleet": "Fleet",
+        "planner": "Planner",
+        "start": "Start Inspection",
+        "cab": "Cab Mode",
+        "impact": "Impact",
+        "handoff": "Handoff"
+    },
+    "hero": {
+        "badge": "HACKILLINOIS 2026 · CAT TRACK",
+        "line1": "THE AI BRAIN FOR",
+        "line2a": "FIELD",
+        "line2b": "OPERATIONS",
+        "sub": "5 agents. Voice. Vision. Any weather. Any language. Blockchain verified.",
+        "cta": "Start Inspection",
+        "demo": "Watch Demo"
+    },
+    "status": {
+        "go": "GO",
+        "caution": "CAUTION",
+        "nogo": "NO-GO",
+        "go_action": "Continue normal operations",
+        "caution_action": "Schedule maintenance within 30 days",
+        "nogo_action": "Do not operate. Immediate repair required."
+    },
+    "inspect": {
+        "title": "Start Inspection",
+        "select_machine": "Select Your Machine",
+        "serial": "Serial Number",
+        "hours": "SMU / Hours",
+        "site": "Site Name",
+        "inspector": "Inspector Name",
+        "quick": "Quick Check",
+        "full": "Full Inspection",
+        "quick_sub": "6 items · 5 minutes",
+        "full_sub": "10 sections · 15 minutes",
+        "take_photo": "Take Photo",
+        "voice_note": "Voice Note",
+        "mark_go": "Mark GO",
+        "analyzing": "FieldMind is analyzing...",
+        "complete": "Complete Inspection",
+        "verify_blockchain": "Verify on Blockchain",
+        "export_pdf": "Export PDF Report",
+        "read_aloud": "Read Aloud",
+        "share": "Share with Supervisor",
+        "recommends": "FIELDMIND RECOMMENDS",
+        "recommends_sub": "Proactive insights from your 5 agents",
+        "live_scan": "Live AR Scan",
+        "live_scan_sub": "Point camera at component for real-time identification"
+    },
+    "weather": {
+        "cold_title": "COLD WEATHER PROTOCOL ACTIVE",
+        "cold_body": "Seals contract in cold — inspect hydraulic hoses with extra care. Voice mode recommended.",
+        "cold_cta": "Switch to Voice Mode",
+        "hot_title": "HEAT ADVISORY",
+        "hot_body": "Check coolant levels first. Fluid viscosity affected above 95°F.",
+        "rain_title": "WET CONDITIONS",
+        "rain_body": "Check slip hazards on steps. Electrical connections require extra attention.",
+        "wind_title": "HIGH WIND WARNING",
+        "wind_body": "Secure all loose attachments. Check wind speed limits for your machine."
+    },
+    "parts": {
+        "title": "Identify Any CAT Part",
+        "sub": "Photo, voice, or description → real CAT part numbers",
+        "photo": "Photo",
+        "voice": "Voice",
+        "text": "Text",
+        "drop": "Drop photo or click to capture",
+        "describe": "Describe the part",
+        "search": "Identify Part",
+        "best_match": "BEST MATCH",
+        "confidence": "confidence",
+        "order": "Order from CAT",
+        "fits": "Fits"
+    },
+    "fleet": {
+        "title": "Fleet Health Dashboard",
+        "health": "Health Score",
+        "last_inspection": "Last Inspection",
+        "next_service": "Next Service",
+        "inspect_now": "Inspect Now",
+        "history": "View History",
+        "predicted": "Predicted Failure Timeline",
+        "act_now": "Act Now",
+        "wait_30": "Wait 30 Days",
+        "wait_90": "Wait 90 Days"
+    },
+    "cab": {
+        "hold": "HOLD TO SPEAK",
+        "listening": "Listening...",
+        "processing": "Processing...",
+        "capture": "Capture",
+        "checklist": "Checklist",
+        "workorder": "Work Order",
+        "dealer": "Call Dealer"
+    },
+    "blockchain": {
+        "verify": "BLOCKCHAIN VERIFIED",
+        "network": "Solana Devnet",
+        "view": "View on Solana Explorer",
+        "copy": "Copy",
+        "verified_at": "Verified"
+    },
+    "impact": {
+        "title": "Saving Lives on Every Jobsite",
+        "injuries": "construction injuries per day",
+        "caused": "caused by equipment failure",
+        "preventable": "are preventable",
+        "cost": "annual cost of incidents",
+        "calculator": "How many sites using FieldMind?",
+        "inspections": "Inspections per year",
+        "defects": "Defects caught",
+        "prevented": "Injuries prevented",
+        "saved": "Money saved"
+    },
+    "ar": {
+        "scanning": "Scanning...",
+        "found": "Component identified",
+        "tap_to_inspect": "Tap to inspect",
+        "confidence": "Confidence",
+        "aim_at": "Aim camera at equipment"
+    }
+}

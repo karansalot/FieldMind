@@ -1,0 +1,21 @@
+name = "fieldmind-worker"
+main = "worker/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fieldmind-db"
+database_id = "placeholder-replace-after-create"
+
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "fieldmind-photos"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "placeholder-replace-after-create"
+
+[vars]
+APP_URL = "https://fieldmind.tech"
+SOLANA_NETWORK = "devnet"

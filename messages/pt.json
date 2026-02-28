@@ -1,0 +1,126 @@
+{
+    "nav": {
+        "inspect": "Inspecionar",
+        "parts": "Peças",
+        "fleet": "Frota",
+        "planner": "Planejador",
+        "start": "Iniciar Inspeção",
+        "cab": "Modo Cabine",
+        "impact": "Impacto",
+        "handoff": "Passagem"
+    },
+    "hero": {
+        "badge": "HACKILLINOIS 2026 · CAT TRACK",
+        "line1": "O CÉREBRO IA PARA",
+        "line2a": "OPERAÇÕES DE",
+        "line2b": "CAMPO",
+        "sub": "5 agentes. Voz. Visão. Qualquer clima. Qualquer idioma. Verificado em blockchain.",
+        "cta": "Iniciar Inspeção",
+        "demo": "Ver Demo"
+    },
+    "status": {
+        "go": "SEGUIR",
+        "caution": "CUIDADO",
+        "nogo": "NÃO OPERAR",
+        "go_action": "Continuar operações normais",
+        "caution_action": "Agendar manutenção em 30 dias",
+        "nogo_action": "Não operar. Reparo imediato necessário."
+    },
+    "inspect": {
+        "title": "Iniciar Inspeção",
+        "select_machine": "Selecionar Máquina",
+        "serial": "Número de Série",
+        "hours": "SMU / Horas",
+        "site": "Nome do Local",
+        "inspector": "Nome do Inspetor",
+        "quick": "Verificação Rápida",
+        "full": "Inspeção Completa",
+        "quick_sub": "6 itens · 5 minutos",
+        "full_sub": "10 seções · 15 minutos",
+        "take_photo": "Tirar Foto",
+        "voice_note": "Nota de Voz",
+        "mark_go": "Marcar SEGUIR",
+        "analyzing": "FieldMind está analisando...",
+        "complete": "Concluir Inspeção",
+        "verify_blockchain": "Verificar no Blockchain",
+        "export_pdf": "Exportar Relatório PDF",
+        "read_aloud": "Ler em Voz Alta",
+        "share": "Compartilhar com Supervisor",
+        "recommends": "FIELDMIND RECOMENDA",
+        "recommends_sub": "Informações proativas dos seus 5 agentes",
+        "live_scan": "Digitalização AR ao Vivo",
+        "live_scan_sub": "Aponte a câmera para o componente para identificação em tempo real"
+    },
+    "weather": {
+        "cold_title": "PROTOCOLO DE FRIO ATIVO",
+        "cold_body": "Vedações se contraem no frio — inspecione as mangueiras hidráulicas com cuidado extra.",
+        "cold_cta": "Mudar para Modo de Voz",
+        "hot_title": "AVISO DE CALOR",
+        "hot_body": "Verifique os níveis de refrigerante primeiro.",
+        "rain_title": "CONDIÇÕES ÚMIDAS",
+        "rain_body": "Verifique riscos de escorregamento nos degraus.",
+        "wind_title": "AVISO DE VENTO FORTE",
+        "wind_body": "Prenda todos os acessórios soltos."
+    },
+    "parts": {
+        "title": "Identificar Qualquer Peça CAT",
+        "sub": "Foto, voz ou descrição → números de peça CAT reais",
+        "photo": "Foto",
+        "voice": "Voz",
+        "text": "Texto",
+        "drop": "Solte foto ou clique para capturar",
+        "describe": "Descreva a peça",
+        "search": "Identificar Peça",
+        "best_match": "MELHOR CORRESPONDÊNCIA",
+        "confidence": "confiança",
+        "order": "Pedir da CAT",
+        "fits": "Compatível"
+    },
+    "fleet": {
+        "title": "Painel de Saúde da Frota",
+        "health": "Pontuação de Saúde",
+        "last_inspection": "Última Inspeção",
+        "next_service": "Próxima Manutenção",
+        "inspect_now": "Inspecionar Agora",
+        "history": "Ver Histórico",
+        "predicted": "Cronograma de Falha Prevista",
+        "act_now": "Agir Agora",
+        "wait_30": "Aguardar 30 Dias",
+        "wait_90": "Aguardar 90 Dias"
+    },
+    "cab": {
+        "hold": "SEGURAR PARA FALAR",
+        "listening": "Ouvindo...",
+        "processing": "Processando...",
+        "capture": "Capturar",
+        "checklist": "Lista de Verificação",
+        "workorder": "Ordem de Serviço",
+        "dealer": "Ligar para Revendedor"
+    },
+    "blockchain": {
+        "verify": "VERIFICADO NO BLOCKCHAIN",
+        "network": "Solana Devnet",
+        "view": "Ver no Solana Explorer",
+        "copy": "Copiar",
+        "verified_at": "Verificado"
+    },
+    "impact": {
+        "title": "Salvando Vidas em Cada Obra",
+        "injuries": "lesões de construção por dia",
+        "caused": "causadas por falha de equipamentos",
+        "preventable": "são preveníveis",
+        "cost": "custo anual de incidentes",
+        "calculator": "Quantos locais usam FieldMind?",
+        "inspections": "Inspeções por ano",
+        "defects": "Defeitos encontrados",
+        "prevented": "Lesões prevenidas",
+        "saved": "Dinheiro economizado"
+    },
+    "ar": {
+        "scanning": "Digitalizando...",
+        "found": "Componente identificado",
+        "tap_to_inspect": "Toque para inspecionar",
+        "confidence": "Confiança",
+        "aim_at": "Aponte a câmera para o equipamento"
+    }
+}

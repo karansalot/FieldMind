@@ -1,0 +1,126 @@
+{
+    "nav": {
+        "inspect": "检查",
+        "parts": "零件",
+        "fleet": "车队",
+        "planner": "规划",
+        "start": "开始检查",
+        "cab": "驾驶室模式",
+        "impact": "影响",
+        "handoff": "交接"
+    },
+    "hero": {
+        "badge": "HACKILLINOIS 2026 · CAT TRACK",
+        "line1": "现场作业的",
+        "line2a": "人工智能",
+        "line2b": "大脑",
+        "sub": "5个AI代理。语音。视觉。任何天气。任何语言。区块链验证。",
+        "cta": "开始检查",
+        "demo": "观看演示"
+    },
+    "status": {
+        "go": "通过",
+        "caution": "注意",
+        "nogo": "停止",
+        "go_action": "继续正常操作",
+        "caution_action": "30天内安排维护",
+        "nogo_action": "请勿操作。需要立即维修。"
+    },
+    "inspect": {
+        "title": "开始检查",
+        "select_machine": "选择机器",
+        "serial": "序列号",
+        "hours": "SMU / 工时",
+        "site": "工地名称",
+        "inspector": "检查员姓名",
+        "quick": "快速检查",
+        "full": "完整检查",
+        "quick_sub": "6项 · 5分钟",
+        "full_sub": "10节 · 15分钟",
+        "take_photo": "拍照",
+        "voice_note": "语音备注",
+        "mark_go": "标记通过",
+        "analyzing": "FieldMind正在分析...",
+        "complete": "完成检查",
+        "verify_blockchain": "在区块链上验证",
+        "export_pdf": "导出PDF报告",
+        "read_aloud": "朗读",
+        "share": "与主管共享",
+        "recommends": "FIELDMIND推荐",
+        "recommends_sub": "来自5个AI代理的主动见解",
+        "live_scan": "AR实时扫描",
+        "live_scan_sub": "将摄像头对准组件进行实时识别"
+    },
+    "weather": {
+        "cold_title": "寒冷天气协议已激活",
+        "cold_body": "寒冷会导致密封件收缩 — 请格外仔细地检查液压软管。建议使用语音模式。",
+        "cold_cta": "切换到语音模式",
+        "hot_title": "高温预警",
+        "hot_body": "首先检查冷却液液位。液体粘度受高温影响。",
+        "rain_title": "潮湿条件",
+        "rain_body": "检查台阶上的滑倒危险。电气连接需要特别注意。",
+        "wind_title": "强风警告",
+        "wind_body": "固定所有松动的附件。检查机器的风速限制。"
+    },
+    "parts": {
+        "title": "识别任何CAT零件",
+        "sub": "照片、语音或描述 → 真实的CAT零件编号",
+        "photo": "照片",
+        "voice": "语音",
+        "text": "文字",
+        "drop": "拖放照片或点击捕获",
+        "describe": "描述零件",
+        "search": "识别零件",
+        "best_match": "最佳匹配",
+        "confidence": "置信度",
+        "order": "从CAT订购",
+        "fits": "适配"
+    },
+    "fleet": {
+        "title": "车队健康仪表板",
+        "health": "健康分数",
+        "last_inspection": "上次检查",
+        "next_service": "下次维护",
+        "inspect_now": "立即检查",
+        "history": "查看历史",
+        "predicted": "预测故障时间线",
+        "act_now": "立即行动",
+        "wait_30": "等待30天",
+        "wait_90": "等待90天"
+    },
+    "cab": {
+        "hold": "按住说话",
+        "listening": "监听中...",
+        "processing": "处理中...",
+        "capture": "捕获",
+        "checklist": "检查清单",
+        "workorder": "工单",
+        "dealer": "联系经销商"
+    },
+    "blockchain": {
+        "verify": "区块链已验证",
+        "network": "Solana 开发网",
+        "view": "在Solana Explorer查看",
+        "copy": "复制",
+        "verified_at": "验证时间"
+    },
+    "impact": {
+        "title": "在每个工地拯救生命",
+        "injuries": "每天建筑业工伤人数",
+        "caused": "由设备故障引起",
+        "preventable": "是可预防的",
+        "cost": "事故年度成本",
+        "calculator": "有多少工地在使用FieldMind？",
+        "inspections": "每年检查次数",
+        "defects": "发现的缺陷",
+        "prevented": "预防的伤害",
+        "saved": "节省的资金"
+    },
+    "ar": {
+        "scanning": "扫描中...",
+        "found": "已识别组件",
+        "tap_to_inspect": "点击检查",
+        "confidence": "置信度",
+        "aim_at": "将摄像头对准设备"
+    }
+}
