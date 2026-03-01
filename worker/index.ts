@@ -351,6 +351,24 @@ export default {
                     zh: '用中文回复。'
                 }
 
+                let sectionSpecificRules = ""
+                const lowerItem = body.item_name?.toLowerCase() || ""
+                if (lowerItem.includes('tire') || lowerItem.includes('rim') || lowerItem.includes('wheel')) {
+                    sectionSpecificRules = `
+## TIRES AND RIMS SECTION - SPECIFIC FOCUS
+🔴 CRITICAL (RED): Flat/damaged tires, blowouts, cracked/broken rims, missing wheel hardware, severe rim corrosion.
+🟡 MODERATE (YELLOW): Moderate/uneven tire wear, minor tire/rim damage, valve stem issues, pin/bushing wear.
+✅ NORMAL (GREEN): Adequate tread depth, proper pressure, secure mounting.
+`
+                } else if (lowerItem.includes('coolant') || lowerItem.includes('radiator')) {
+                    sectionSpecificRules = `
+## ENGINE COOLANT LEVEL - SPECIFIC FOCUS
+🔴 CRITICAL (RED): Critically low coolant, continuous coolant loss, major leaks, radiator damage, hose failures, water pump internal failures, coolant contamination in oil, climate control failure.
+🟡 MODERATE (YELLOW): Coolant level maintenance monitoring, coolant quality assessment, radiator cleaning needs, hose monitoring, engine temp monitoring.
+✅ NORMAL (GREEN): Adequate coolant level, clean coolant, leak-free, functional radiator.
+`
+                }
+
                 const systemPrompt = `You are a CAT® certified inspection AI following Cat® Inspect standards and advanced Heavy Equipment Daily Analysis guidelines.
 
 LANGUAGE: ${langInstructions[lang] || langInstructions.en}
@@ -358,10 +376,13 @@ LANGUAGE: ${langInstructions[lang] || langInstructions.en}
 MACHINE: Cat® ${insp.machine_model} | Serial: ${insp.serial_number || 'N/A'} | SMU: ${insp.smu_hours}h
 WEATHER: ${weatherCtx}
 
-You are inspecting the module: "${body.item_name}", BUT you must perform a comprehensive visual inspection of ALL components visible in the image or video.
+You are inspecting the module: "${body.item_name}".
+${sectionSpecificRules}
+
+BUT you must also perform a comprehensive visual inspection of ALL components visible in the image or video.
 
 1. Describe the physical condition with technical precision.
-2. Identify specific types of damage (wear patterns, fractures, deformation, contamination, leakage, etc.) for ANY visible component, even if outside the specific module being inspected.
+2. Identify specific types of damage (wear patterns, fractures, deformation, contamination, leakage, missing hardware, etc.) for ANY visible component, even if outside the specific module being inspected.
 3. Classify issues by severity:
    - CRITICAL (RED): immediate shutdown required
    - MAJOR (YELLOW): scheduled repair needed
