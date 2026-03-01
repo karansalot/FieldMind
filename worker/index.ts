@@ -553,6 +553,19 @@ Return ONLY valid JSON matching this exact structure:
                 return respond({ transcript: text, fallback: true })
             }
 
+            // ── POST /api/inspections/:id/audit ──────────────────────────────
+            if (method === 'POST' && path.match(/^\/api\/inspections\/([^/]+)\/audit$/)) {
+                const inspId = path.split('/')[3]
+                const body = await request.json() as any
+                const { item_id, original_finding, new_finding, action_type } = body
+
+                await env.DB.prepare(
+                    `INSERT INTO audit_logs (id, inspection_id, item_id, original_finding, new_finding, action_type, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+                ).bind(generateId(), inspId, item_id || 'general', original_finding, new_finding, action_type || 'manual_correction', new Date().toISOString()).run()
+
+                return respond({ success: true })
+            }
+
             // ── POST /api/inspections/:id/complete ───────────────────────────
             const completeMatch = path.match(/^\/api\/inspections\/([^/]+)\/complete$/)
             if (method === 'POST' && completeMatch) {

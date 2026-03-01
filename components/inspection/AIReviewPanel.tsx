@@ -140,7 +140,23 @@ export default function AIReviewPanel({ initialFindings, onAccept, onReject }: P
                         Retake
                     </button>
                     <button
-                        onClick={() => onAccept({ finding: editedFinding, status, override: true })}
+                        onClick={async () => {
+                            if (editedFinding !== initialFindings.finding) {
+                                try {
+                                    // Non-blocking fire and forget audit log
+                                    fetch(`${process.env.NEXT_PUBLIC_WORKER_URL || 'http://localhost:8787'}/api/inspections/current/audit`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            original_finding: initialFindings.finding,
+                                            new_finding: editedFinding,
+                                            action_type: 'human_override'
+                                        })
+                                    })
+                                } catch (e) { }
+                            }
+                            onAccept({ finding: editedFinding, status, override: true })
+                        }}
                         className="flex-1 py-3 px-4 rounded-xl font-bold bg-primary text-black hover:bg-primary/90 transition flex items-center justify-center gap-2"
                     >
                         <Check className="w-5 h-5" />

@@ -80,7 +80,7 @@ export default function PhotoCapture({ onCapture, label = 'Capture Media' }: Pro
     }
 
     const takePhoto = () => {
-        vibrate('light')
+        vibrate('light' as any)
         if (!videoRef.current) return
         const canvas = document.createElement('canvas')
         canvas.width = videoRef.current.videoWidth
@@ -97,7 +97,7 @@ export default function PhotoCapture({ onCapture, label = 'Capture Media' }: Pro
 
     const startRecording = () => {
         if (!stream) return
-        vibrate('light')
+        vibrate('light' as any)
         chunks.current = []
         setFrames([])
         const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' })
@@ -142,7 +142,7 @@ export default function PhotoCapture({ onCapture, label = 'Capture Media' }: Pro
     }
 
     const stopRecording = () => {
-        vibrate('success')
+        vibrate('success' as any)
         mediaRecorderRef.current?.stop()
         setRecording(false)
         if (frameIntervalRef.current) clearInterval(frameIntervalRef.current)

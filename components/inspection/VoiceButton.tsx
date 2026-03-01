@@ -13,7 +13,7 @@ interface VoiceButtonProps {
 }
 
 export function VoiceButton({ onTranscript, disabled = false, className, language = 'en' }: VoiceButtonProps) {
-    const { isListening, transcript, startListening, stopListening } = useVoice(language)
+    const { isListening, transcript, startListening, stopListening } = useVoice()
     const [isProcessing, setIsProcessing] = useState(false)
 
     const handleToggle = () => {
