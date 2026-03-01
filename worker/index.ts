@@ -407,7 +407,7 @@ Return ONLY valid JSON matching this exact structure (based on your confidence l
                     }]
 
                     if (body.video_frames && body.video_frames.length > 0) {
-                        const framesOnlyPrompt = \`As a certified heavy equipment inspector, conduct a thorough visual assessment of these machinery frames. For each component:
+                        const framesOnlyPrompt = `As a certified heavy equipment inspector, conduct a thorough visual assessment of these machinery frames. For each component:
 
 1. Document exact physical condition with technical precision
 2. Identity all the frames and generate the summary frame by frame, do not miss any frames.
@@ -415,35 +415,35 @@ Return ONLY valid JSON matching this exact structure (based on your confidence l
 4. Provide exact timestamp ranges (or frame indicators) for every observation
 5. Generate a prioritized inspection summary listing all critical findings first
 
-Focus exclusively on visual indicators of mechanical condition. Apply standard inspection protocols for heavy industrial equipment.\`
+Focus exclusively on visual indicators of mechanical condition. Apply standard inspection protocols for heavy industrial equipment.`
 
                         messages[0].content = [
-                            { type: 'text', text: \`Inspect item \${body.item_number || ''} — \${body.item_name}: \${body.section_name || ''}\${body.voice_note ? \`\\nInspector note: "\${body.voice_note}"\` : ''}\\n\\n\${framesOnlyPrompt}\\n\\nHere are frames extracted from a video:\` },
+                            { type: 'text', text: `Inspect item ${body.item_number || ''} — ${body.item_name}: ${body.section_name || ''}${body.voice_note ? `\nInspector note: "${body.voice_note}"` : ''}\n\n${framesOnlyPrompt}\n\nHere are frames extracted from a video:` },
                             ...body.video_frames.slice(0, 5).map((frame: string) => ({
                                 type: 'image_url', image_url: {
-                                    url: frame.startsWith('data:') ? frame : \`data:image/jpeg;base64,\${frame}\`,
+                                    url: frame.startsWith('data:') ? frame : `data:image/jpeg;base64,${frame}`,
                                     detail: 'low'
                                 }
                             }))
                         ]
                     } else {
-                        const baselinePrompt = \`Perform a comprehensive visual inspection of this heavy equipment footage. For each component visible:
+                        const baselinePrompt = `Perform a comprehensive visual inspection of this heavy equipment footage. For each component visible:
 1. Document exact condition using industry-standard terminology
 2. Identify any abnormalities (wear, damage, misalignment, leakage, etc.)
 3. Classify each issue's severity (Critical/Major/Minor)
 4. Recommend specific maintenance actions based on findings
 
-Focus exclusively on what can be objectively verified through visual inspection. Highlight potential failure points requiring immediate attention.\`
+Focus exclusively on what can be objectively verified through visual inspection. Highlight potential failure points requiring immediate attention.`
 
                         if (Array.isArray(messages[0].content)) {
-                            messages[0].content[0].text = \`Inspect item \${body.item_number || ''} — \${body.item_name}: \${body.section_name || ''}\${body.voice_note ? \`\\nInspector note: "\${body.voice_note}"\` : ''}\\n\\n\${baselinePrompt}\`
+                            messages[0].content[0].text = `Inspect item ${body.item_number || ''} — ${body.item_name}: ${body.section_name || ''}${body.voice_note ? `\nInspector note: "${body.voice_note}"` : ''}\n\n${baselinePrompt}`
                         }
                     }
 
                     try {
                         const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
                             method: 'POST',
-                            headers: { 'Authorization': `Bearer ${ env.OPENAI_API_KEY } `, 'Content-Type': 'application/json' },
+                            headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY} `, 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 model: 'gpt-4o',
                                 messages: [{ role: 'system', content: systemPrompt }, ...messages],
@@ -497,7 +497,7 @@ Focus exclusively on what can be objectively verified through visual inspection.
                     try {
                         const base64Data = body.image_base64.replace(/^data:image\/\w+;base64,/, '')
                         const imageBuffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))
-                        photoR2Key = `photos / ${ inspId }/${generateId()}.jpg`
+                        photoR2Key = `photos / ${inspId}/${generateId()}.jpg`
                         await env.STORAGE.put(photoR2Key, imageBuffer, {
                             httpMetadata: { contentType: 'image/jpeg' }
                         })
