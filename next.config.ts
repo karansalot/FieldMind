@@ -12,7 +12,10 @@ const nextConfig: any = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: { serverActions: { allowedOrigins: ['fieldmind.tech', 'localhost:3000'] } },
+  async rewrites() {
+    return [{ source: '/api/:path*', destination: `${process.env.NEXT_PUBLIC_WORKER_URL}/api/:path*` }]
+  }
 }
 
 export default nextConfig
-
