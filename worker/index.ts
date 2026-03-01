@@ -245,6 +245,28 @@ export default {
                 return json(result)
             }
 
+            // Report generation
+            const reportMatch = path.match(/^\/api\/inspections\/([^/]+)\/report$/)
+            if (request.method === 'GET' && reportMatch) {
+                const insp: any = await env.DB.prepare('SELECT * FROM inspections WHERE id=?').bind(reportMatch[1]).first()
+                if (!insp) return err(404, 'not_found', 'Inspection not found')
+                const comps = await env.DB.prepare('SELECT * FROM components WHERE inspection_id=? ORDER BY section_order,created_at').bind(insp.id).all()
+                const reportData = { ...insp, components: comps.results }
+
+                if (url.searchParams.get('format') === 'pdf') {
+                    const { generatePDF } = await import('./pdf')
+                    const pdfBuffer = await generatePDF(reportData)
+                    return new Response(pdfBuffer, {
+                        headers: {
+                            'Content-Type': 'application/pdf',
+                            'Content-Disposition': `attachment; filename="FieldMind-Report-${insp.report_number}.pdf"`,
+                            'Access-Control-Allow-Origin': '*'
+                        }
+                    })
+                }
+                return json(reportData)
+            }
+
             // Verify by signature
             const sigMatch = path.match(/^\/api\/verify\/(.+)$/)
             if (request.method === 'GET' && sigMatch) {
