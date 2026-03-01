@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { WeatherProvider } from '@/contexts/WeatherContext'
+import SOSButton from '@/components/ui/SOSButton'
 
 export const metadata: Metadata = {
   title: 'FieldMind — The AI Brain for Field Operations',
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LanguageProvider>
           <WeatherProvider>
             {children}
+            <SOSButton />
           </WeatherProvider>
         </LanguageProvider>
       </body>

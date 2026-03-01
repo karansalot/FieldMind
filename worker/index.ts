@@ -351,71 +351,37 @@ export default {
                     zh: '用中文回复。'
                 }
 
-                const systemPrompt = `You are a CAT® certified inspection AI following Cat® Inspect standards.
+                const systemPrompt = `You are a CAT® certified inspection AI following Cat® Inspect standards and advanced HackIL26-CATrack anomaly detection guidelines.
 
 LANGUAGE: ${langInstructions[lang] || langInstructions.en}
 
-STATUS MAPPING (use exactly these values):
-- PASS: No defects. Normal condition. Safe to operate. (= GO)
-- MONITOR: Minor wear/issue. Safe but schedule service within 30 days. (= CAUTION)  
-- FAIL: Significant defect. DO NOT OPERATE. Immediate repair required. (= NO-GO)
-
 MACHINE: Cat® ${insp.machine_model} | Serial: ${insp.serial_number || 'N/A'} | SMU: ${insp.smu_hours}h
 WEATHER: ${weatherCtx}
-${insp.weather_temp && insp.weather_temp <= 32 ? 'COLD WEATHER: Seals brittle, hydraulics sluggish, check battery.' : ''}
-${insp.weather_temp && insp.weather_temp >= 95 ? 'HOT WEATHER: Coolant critical, hydraulic overheating risk.' : ''}
-
-MACHINE HISTORY: ${machineHistory || 'No prior inspection data.'}
-
-CAT PART NUMBERS (use real numbers in parts_needed):
-1R-0750 Engine Oil Filter | 326-1643 Hydraulic Return Filter | 175-2949 Air Filter
-156-3124 Fuel Filter | 6V-4965 Hydraulic Seal Kit | 5P-0960 O-Ring Seal
-6Y-3222 Bucket Tooth | 8E-6252 Tooth Adapter | 2J-3506 Track Bolt & Nut
 
 CRITICAL FAIL CONDITIONS (always FAIL status):
-- Active hydraulic leak
-- Structural crack
-- Missing/damaged ROPS/FOPS
-- Non-functional backup alarm or brakes
-- Missing fire extinguisher
-- Fuel leak
+- Active hydraulic leak, Structural crack, Missing/damaged ROPS/FOPS, Non-functional backup alarm or brakes, Missing fire extinguisher, Fuel leak
 
-Return ONLY valid JSON — no other text:
+MODULE CONSTRAINED PROMPTING: You are inspecting the module: "${body.item_name}". Only output anomalies relevant to this module. Confirm the primary visible defect.
+
+Return ONLY valid JSON matching this exact structure:
 {
-  "status": "PASS" | "MONITOR" | "FAIL",
-  "fieldmind_status": "GO" | "CAUTION" | "NO-GO",
-  "confidence": 0-100,
-  "finding": "One clear sentence in the selected language.",
-  "severity": 1-5,
-  "details": {
-    "observations": ["string"],
-    "affected_area": "string",
-    "estimated_wear_percent": 0-100,
-    "time_to_failure": "string or null"
-  },
-  "action": {
-    "immediate": "string",
-    "recommended": "string",
-    "parts_needed": [
-      {
-        "part_number": "string",
-        "part_name": "string",
-        "quantity": 1,
-        "urgency": "immediate|scheduled|preventive",
-        "order_url": "https://parts.cat.com/en/catcorp"
-      }
-    ],
-    "estimated_repair_cost": "string",
-    "downtime_estimate": "string"
-  },
-  "proactive": {
-    "next_service_due": "string",
-    "related_checks": ["string"],
-    "operator_coaching": "string",
-    "order_parts_now": true | false,
-    "weather_factor": true | false,
-    "weather_note": "string"
-  }
+  "anomalies":[
+    {
+      "component_location": "string",
+      "component_type": "string",
+      "condition_description": "string",
+      "safety_impact_assessment": "Critical|Moderate|Low|None",
+      "visibility_impact": "string",
+      "operational_impact": "string",
+      "recommended_action": "string",
+      "confidence": 0-1,
+      "severity": "RED|YELLOW|GREEN"
+    }
+  ],
+  "summary": "string",
+  "risk_score": 0-100,
+  "priority": "Immediate|Schedule|Monitor",
+  "next_steps": ["string"]
 }`
 
                 let aiResult: any = null
@@ -435,6 +401,18 @@ Return ONLY valid JSON — no other text:
                             ]
                             : [{ type: 'text', text: `Inspect item ${body.item_number || ''} — ${body.item_name}${body.voice_note ? `\nInspector note: "${body.voice_note}"` : '\nNo photo — provide guidance based on common failure modes.'}` }]
                     }]
+
+                    if (body.video_frames && body.video_frames.length > 0) {
+                        messages[0].content = [
+                            { type: 'text', text: `Inspect item ${body.item_number || ''} — ${body.item_name}: ${body.section_name || ''}${body.voice_note ? `\nInspector note: "${body.voice_note}"` : ''}\n\nHere are frames extracted from a video:` },
+                            ...body.video_frames.slice(0, 5).map((frame: string) => ({
+                                type: 'image_url', image_url: {
+                                    url: frame.startsWith('data:') ? frame : `data:image/jpeg;base64,${frame}`,
+                                    detail: 'low'
+                                }
+                            }))
+                        ]
+                    }
 
                     try {
                         const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -457,16 +435,35 @@ Return ONLY valid JSON — no other text:
                 // Fallback if no OpenAI or error
                 if (!aiResult) {
                     aiResult = {
-                        status: body.manual_status ? fieldMindToCatStatus(body.manual_status) : 'MONITOR',
-                        fieldmind_status: body.manual_status || 'CAUTION',
-                        confidence: 50,
-                        finding: body.voice_note || 'AI analysis unavailable. Manual review required.',
-                        severity: 2,
-                        details: { observations: [], affected_area: '', estimated_wear_percent: 0, time_to_failure: null },
-                        action: { immediate: 'Manual inspection required', recommended: 'Re-inspect with photo', parts_needed: [], estimated_repair_cost: 'Unknown', downtime_estimate: 'Unknown' },
-                        proactive: { next_service_due: 'Check service manual', related_checks: [], operator_coaching: '', order_parts_now: false, weather_factor: false, weather_note: '' }
+                        anomalies: [
+                            {
+                                component_location: body.item_name,
+                                component_type: "General",
+                                condition_description: body.voice_note || "Analysis unavailable. Manual review required.",
+                                safety_impact_assessment: "Moderate",
+                                visibility_impact: "None",
+                                operational_impact: "Monitor",
+                                recommended_action: "Manual inspection",
+                                confidence: 0.5,
+                                severity: body.manual_status === 'NO-GO' ? 'RED' : body.manual_status === 'CAUTION' ? 'YELLOW' : 'GREEN'
+                            }
+                        ],
+                        summary: "Fallback local transcript result.",
+                        risk_score: 50,
+                        priority: "Monitor",
+                        next_steps: ["Re-verify manually"]
                     }
                 }
+
+                // Map schema to fieldmind internal state
+                const highestSeverity = aiResult.anomalies?.some((a: any) => a.severity === 'RED') ? 'RED'
+                    : aiResult.anomalies?.some((a: any) => a.severity === 'YELLOW') ? 'YELLOW' : 'GREEN'
+
+                const catStatus = highestSeverity === 'RED' ? 'FAIL' : highestSeverity === 'YELLOW' ? 'MONITOR' : 'PASS'
+                const fmStatus = highestSeverity === 'RED' ? 'NO-GO' : highestSeverity === 'YELLOW' ? 'CAUTION' : 'GO'
+                const mainFinding = aiResult.summary || aiResult.anomalies?.[0]?.condition_description || ''
+                const confidenceRaw = aiResult.anomalies?.[0]?.confidence || 0.5
+                const confidencePct = confidenceRaw <= 1 ? Math.round(confidenceRaw * 100) : confidenceRaw
 
                 // Save photo to R2 if provided
                 let photoR2Key = ''
@@ -487,8 +484,6 @@ Return ONLY valid JSON — no other text:
 
                 const itemId = generateId()
                 const now = new Date().toISOString()
-                const catStatus = aiResult.status || 'MONITOR'
-                const fmStatus = catStatus === 'PASS' ? 'GO' : catStatus === 'FAIL' ? 'NO-GO' : 'CAUTION'
 
                 await env.DB.prepare(`
           INSERT INTO inspection_items (
@@ -504,8 +499,8 @@ Return ONLY valid JSON — no other text:
                     body.item_number || '1.1',
                     body.item_name,
                     fmStatus, catStatus,
-                    aiResult.confidence || 50,
-                    aiResult.finding || '',
+                    confidencePct,
+                    mainFinding,
                     aiResult.action?.immediate || '',
                     aiResult.severity || 1,
                     photoR2Key ? 1 : 0,
@@ -533,6 +528,29 @@ Return ONLY valid JSON — no other text:
                     proactive: aiResult.proactive,
                     photo_saved: !!photoR2Key
                 }, 201)
+            }
+
+            // ── POST /api/voice/transcribe ───────────────────────────────────
+            if (method === 'POST' && path === '/api/voice/transcribe') {
+                const body = await request.json() as any
+                const text = body.transcript || ''
+                const reqLang = body.language || 'en'
+
+                if (!env.OPENAI_API_KEY) {
+                    return respond({ transcript: text, language: reqLang, english: text, spanish: text, is_local: true })
+                }
+                const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [{ role: 'system', content: 'You translate voice notes. Return JSON: {"transcript":"<original>","language":"<detected>","english":"<en translation>","spanish":"<es translation>"}' }, { role: 'user', content: text }],
+                        response_format: { type: 'json_object' }
+                    })
+                })
+                const aiData = await aiRes.json() as any
+                try { return respond(JSON.parse(aiData.choices[0].message.content)) } catch (e) { }
+                return respond({ transcript: text, fallback: true })
             }
 
             // ── POST /api/inspections/:id/complete ───────────────────────────
@@ -811,6 +829,76 @@ Return JSON: {"parts":[{"rank":1,"part_number":"","part_name":"","confidence":0,
                     solana_verified: !!insp.solana_verified,
                     explorer_url: insp.solana_signature ? `https://explorer.solana.com/tx/${insp.solana_signature}?cluster=devnet` : null
                 })
+            }
+
+            // ── POST /api/inspections/:id/sos ────────────────────────────────
+            const sosMatch = path.match(/^\/api\/inspections\/([^/]+)\/sos$/)
+            if (method === 'POST' && sosMatch) {
+                const id = sosMatch[1]
+                const insp = await env.DB.prepare('SELECT * FROM inspections WHERE id=?').bind(id).first()
+                if (!insp) return respondErr(404, 'not_found', 'Inspection not found')
+
+                const now = new Date().toISOString()
+
+                await env.DB.prepare(`
+                    UPDATE inspections 
+                    SET overall_status='NO-GO', risk_score=100, status='complete', completed_at=? 
+                    WHERE id=?
+                `).bind(now, id).run()
+
+                await env.DB.prepare(
+                    'INSERT INTO voice_events (id, transcript, intent_json, created_at) VALUES (?,?,?,?)'
+                ).bind(generateId(), 'EMERGENCY SOS BUTTON ACTIVATED', JSON.stringify({ action: 'sos_alert', critical: true }), now).run()
+
+                return respond({ success: true, message: 'SOS Alert triggered. Inspection locked as NO-GO.' })
+            }
+
+            // ── POST /api/sos ───────────────────────────────────────────────
+            if (method === 'POST' && path === '/api/sos') {
+                const now = new Date().toISOString()
+                await env.DB.prepare(
+                    'INSERT INTO voice_events (id, transcript, intent_json, created_at) VALUES (?,?,?,?)'
+                ).bind(generateId(), 'GLOBAL EMERGENCY SOS ACTIVATED', JSON.stringify({ action: 'sos_alert', critical: true }), now).run()
+                return respond({ success: true, message: 'Global SOS Alert triggered.' })
+            }
+
+            // ── POST /api/refine-note ────────────────────────────────────────
+            if (method === 'POST' && path === '/api/refine-note') {
+                const body = await request.json() as any
+                const text = body.text || ''
+                const targetLang = body.language || 'en'
+                const action = body.action || 'grammar' // 'grammar' | 'professional' | 'concise' | 'translate'
+
+                if (!env.OPENAI_API_KEY) return respond({ refined: text, fallback: true })
+
+                let prompt = ''
+                if (action === 'professional') {
+                    prompt = `Rewrite this field inspection note to be highly professional and technical using standard CAT terminology. Return ONLY the rewritten text.`
+                } else if (action === 'concise') {
+                    prompt = `Condense this field inspection note to be as concise as possible using bullet points or fragments where appropriate. Return ONLY the condensed text.`
+                } else if (action === 'translate') {
+                    prompt = `Translate this field inspection note to ${targetLang === 'es' ? 'Spanish' : targetLang === 'pt' ? 'Portuguese' : targetLang === 'fr' ? 'French' : targetLang === 'zh' ? 'Chinese' : 'English'}. Return ONLY the translated text.`
+                } else {
+                    prompt = `Fix grammar and spelling in this field inspection note. Do not change the original meaning. Return ONLY the corrected text.`
+                }
+
+                const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            { role: 'system', content: prompt },
+                            { role: 'user', content: text }
+                        ],
+                        max_tokens: 300
+                    })
+                })
+                const aiData = await aiRes.json() as any
+                let refined = text
+                try { refined = aiData.choices[0].message.content } catch (e) { }
+
+                return respond({ refined })
             }
 
             // ── GET /api/machines ────────────────────────────────────────────

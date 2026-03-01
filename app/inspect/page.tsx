@@ -10,6 +10,7 @@ import { useWeather } from '@/contexts/WeatherContext'
 import { workerUrl, vibrate } from '@/lib/utils'
 import { INSPECTION_SECTIONS, QUICK_CHECK_COMPONENTS, CAT_MACHINES } from '@/lib/cat-knowledge'
 import dynamic from 'next/dynamic'
+import AIReviewPanel from '@/components/inspection/AIReviewPanel'
 
 const ARLabeling = dynamic(() => import('@/components/inspection/ARLabeling'), { ssr: false })
 const RiskGauge = dynamic(() => import('@/components/three/RiskGauge'), { ssr: false })
@@ -50,6 +51,7 @@ export default function InspectPage() {
     const [voiceNote, setVoiceNote] = useState('')
     const [analyzing, setAnalyzing] = useState(false)
     const [components, setComponents] = useState<any[]>([])
+    const [pendingResult, setPendingResult] = useState<any>(null)
     const [result, setResult] = useState<any>(null)
     const [nogoAlert, setNogoAlert] = useState(false)
     const [finalResult, setFinalResult] = useState<any>(null)
@@ -89,6 +91,17 @@ export default function InspectPage() {
     async function analyzeComponent() {
         if (!photo && !voiceNote) return
         setAnalyzing(true)
+
+        let reqPhoto = photo
+        let frames: string[] = []
+        if (photo && photo.startsWith('{')) {
+            try {
+                const parsed = JSON.parse(photo)
+                reqPhoto = parsed.video
+                frames = parsed.frames
+            } catch (e) { }
+        }
+
         try {
             const res = await fetch(workerUrl(`/api/inspections/${inspId}/components`), {
                 method: 'POST',
@@ -97,23 +110,36 @@ export default function InspectPage() {
                     component_name: mode === 'quick' ? currentComp?.name : currentSection?.components[compIdx],
                     section_name: mode === 'quick' ? 'Quick Check' : currentSection?.name,
                     section_order: mode === 'quick' ? 0 : currentSection?.order,
-                    image_base64: photo,
+                    image_base64: reqPhoto,
+                    video_frames: frames,
                     voice_note: voiceNote,
                     language
                 })
             })
             const data = await res.json()
-            setResult(data)
-            setComponents(prev => [...prev, data])
-            if (data.status === 'NO-GO') {
-                vibrate([200, 100, 200, 100, 400])
-                setNogoAlert(true)
-            } else {
-                vibrate(data.status === 'GO' ? [50] : [100, 50, 100])
-            }
+            setPendingResult(data)
         } finally {
             setAnalyzing(false)
         }
+    }
+
+    function acceptAIResult(editedData: any) {
+        const finalData = { ...pendingResult, ...editedData }
+        setResult(finalData)
+        setComponents(prev => [...prev, finalData])
+        setPendingResult(null)
+        if (finalData.status === 'NO-GO') {
+            vibrate([200, 100, 200, 100, 400])
+            setNogoAlert(true)
+        } else {
+            vibrate(finalData.status === 'GO' ? [50] : [100, 50, 100])
+        }
+    }
+
+    function rejectAIResult() {
+        setPendingResult(null)
+        setPhoto(null)
+        setVoiceNote('')
     }
 
     function nextComponent() {
@@ -295,9 +321,12 @@ export default function InspectPage() {
                                 </div>
                             </div>
 
-                            {!result ? (
+                            {!result && !pendingResult ? (
                                 <>
-                                    <PhotoCapture onCapture={setPhoto} label={t('inspect.take_photo')} />
+                                    <PhotoCapture onCapture={(media, type) => {
+                                        // Send as image for now, but component supports video
+                                        setPhoto(media)
+                                    }} label={t('inspect.take_photo')} />
                                     <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
                                         <button onClick={analyzeComponent} disabled={!photo && !voiceNote || analyzing}
                                             className="btn-brand" style={{ flex: 1, padding: '14px', fontSize: 16, opacity: (!photo && !voiceNote) || analyzing ? 0.7 : 1, cursor: (!photo && !voiceNote) || analyzing ? 'not-allowed' : 'pointer' }}>
@@ -306,6 +335,12 @@ export default function InspectPage() {
                                         <button onClick={markGo} className="btn-ghost" style={{ padding: '14px 20px', fontSize: 16 }}>✅ {t('inspect.mark_go')}</button>
                                     </div>
                                 </>
+                            ) : pendingResult ? (
+                                <AIReviewPanel
+                                    initialFindings={pendingResult}
+                                    onAccept={acceptAIResult}
+                                    onReject={rejectAIResult}
+                                />
                             ) : (
                                 <div>
                                     <StatusBadge status={result.status} size="lg" />
