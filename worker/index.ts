@@ -351,37 +351,41 @@ export default {
                     zh: '用中文回复。'
                 }
 
-                const systemPrompt = `You are a CAT® certified inspection AI following Cat® Inspect standards and advanced HackIL26-CATrack anomaly detection guidelines.
+                const systemPrompt = `You are a CAT® certified inspection AI following Cat® Inspect standards and advanced Heavy Equipment Daily Analysis guidelines.
 
 LANGUAGE: ${langInstructions[lang] || langInstructions.en}
 
 MACHINE: Cat® ${insp.machine_model} | Serial: ${insp.serial_number || 'N/A'} | SMU: ${insp.smu_hours}h
 WEATHER: ${weatherCtx}
 
-CRITICAL FAIL CONDITIONS (always FAIL status):
-- Active hydraulic leak, Structural crack, Missing/damaged ROPS/FOPS, Non-functional backup alarm or brakes, Missing fire extinguisher, Fuel leak
+You are inspecting the module: "${body.item_name}", BUT you must perform a comprehensive visual inspection of ALL components visible in the image or video.
 
-MODULE CONSTRAINED PROMPTING: You are inspecting the module: "${body.item_name}". Only output anomalies relevant to this module. Confirm the primary visible defect.
+1. Describe the physical condition with technical precision.
+2. Identify specific types of damage (wear patterns, fractures, deformation, contamination, leakage, etc.) for ANY visible component, even if outside the specific module being inspected.
+3. Classify issues by severity:
+   - CRITICAL (RED): immediate shutdown required
+   - MAJOR (YELLOW): scheduled repair needed
+   - MINOR (GREEN): monitor during next maintenance
 
-Return ONLY valid JSON matching this exact structure:
+Return ONLY valid JSON matching this exact structure (based on your confidence level):
 {
   "anomalies":[
     {
-      "component_location": "string",
-      "component_type": "string",
-      "condition_description": "string",
-      "safety_impact_assessment": "Critical|Moderate|Low|None",
-      "visibility_impact": "string",
-      "operational_impact": "string",
-      "recommended_action": "string",
-      "confidence": 0-1,
+      "component_location": "e.g., Upper Step, or Coolant Tank",
+      "component_type": "e.g., Step, or Valve",
+      "condition_description": "Detailed description of condition",
+      "safety_impact_assessment": "Critical/Moderate/Low/None",
+      "visibility_impact": "Impact description",
+      "operational_impact": "Impact description",
+      "recommended_action": "Recommended action",
+      "confidence": 0.95,
       "severity": "RED|YELLOW|GREEN"
     }
   ],
-  "summary": "string",
+  "summary": "High level summary of findings across all visible components",
   "risk_score": 0-100,
   "priority": "Immediate|Schedule|Monitor",
-  "next_steps": ["string"]
+  "next_steps": ["Action 1"]
 }`
 
                 let aiResult: any = null
@@ -403,21 +407,43 @@ Return ONLY valid JSON matching this exact structure:
                     }]
 
                     if (body.video_frames && body.video_frames.length > 0) {
+                        const framesOnlyPrompt = \`As a certified heavy equipment inspector, conduct a thorough visual assessment of these machinery frames. For each component:
+
+1. Document exact physical condition with technical precision
+2. Identity all the frames and generate the summary frame by frame, do not miss any frames.
+3. Classify any detected issues by severity (CRITICAL/MAJOR/MINOR)
+4. Provide exact timestamp ranges (or frame indicators) for every observation
+5. Generate a prioritized inspection summary listing all critical findings first
+
+Focus exclusively on visual indicators of mechanical condition. Apply standard inspection protocols for heavy industrial equipment.\`
+
                         messages[0].content = [
-                            { type: 'text', text: `Inspect item ${body.item_number || ''} — ${body.item_name}: ${body.section_name || ''}${body.voice_note ? `\nInspector note: "${body.voice_note}"` : ''}\n\nHere are frames extracted from a video:` },
+                            { type: 'text', text: \`Inspect item \${body.item_number || ''} — \${body.item_name}: \${body.section_name || ''}\${body.voice_note ? \`\\nInspector note: "\${body.voice_note}"\` : ''}\\n\\n\${framesOnlyPrompt}\\n\\nHere are frames extracted from a video:\` },
                             ...body.video_frames.slice(0, 5).map((frame: string) => ({
                                 type: 'image_url', image_url: {
-                                    url: frame.startsWith('data:') ? frame : `data:image/jpeg;base64,${frame}`,
+                                    url: frame.startsWith('data:') ? frame : \`data:image/jpeg;base64,\${frame}\`,
                                     detail: 'low'
                                 }
                             }))
                         ]
+                    } else {
+                        const baselinePrompt = \`Perform a comprehensive visual inspection of this heavy equipment footage. For each component visible:
+1. Document exact condition using industry-standard terminology
+2. Identify any abnormalities (wear, damage, misalignment, leakage, etc.)
+3. Classify each issue's severity (Critical/Major/Minor)
+4. Recommend specific maintenance actions based on findings
+
+Focus exclusively on what can be objectively verified through visual inspection. Highlight potential failure points requiring immediate attention.\`
+
+                        if (Array.isArray(messages[0].content)) {
+                            messages[0].content[0].text = \`Inspect item \${body.item_number || ''} — \${body.item_name}: \${body.section_name || ''}\${body.voice_note ? \`\\nInspector note: "\${body.voice_note}"\` : ''}\\n\\n\${baselinePrompt}\`
+                        }
                     }
 
                     try {
                         const aiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
                             method: 'POST',
-                            headers: { 'Authorization': `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+                            headers: { 'Authorization': `Bearer ${ env.OPENAI_API_KEY } `, 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 model: 'gpt-4o',
                                 messages: [{ role: 'system', content: systemPrompt }, ...messages],
@@ -471,7 +497,7 @@ Return ONLY valid JSON matching this exact structure:
                     try {
                         const base64Data = body.image_base64.replace(/^data:image\/\w+;base64,/, '')
                         const imageBuffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))
-                        photoR2Key = `photos/${inspId}/${generateId()}.jpg`
+                        photoR2Key = `photos / ${ inspId }/${generateId()}.jpg`
                         await env.STORAGE.put(photoR2Key, imageBuffer, {
                             httpMetadata: { contentType: 'image/jpeg' }
                         })
@@ -758,7 +784,22 @@ Return ONLY valid JSON matching this exact structure:
                 const langNote = lang === 'es' ? 'Responde en español. Nombres de piezas en español. Números de parte en inglés.' : ''
 
                 if (!env.OPENAI_API_KEY) {
-                    return respond({ parts: [], fallback: true, message: 'AI disabled. Visit parts.cat.com directly.' })
+                    return respond({
+                        parts: [
+                            {
+                                rank: 1,
+                                part_number: "8T-4136",
+                                part_name: "Hex Head Bolt - Corroded (MOCK)",
+                                confidence: 92,
+                                category: "Hardware/Fasteners",
+                                fits_models: ["All Models"],
+                                price_estimate: "$2.50",
+                                order_url: "https://parts.cat.com/en/catcorp",
+                                why: "Visual match for standard rusted hex head bolt. (Note: This is a demo fallback result. Add OPENAI_API_KEY for live analysis)."
+                            }
+                        ],
+                        fallback: true
+                    })
                 }
 
                 const messages: any[] = [{
