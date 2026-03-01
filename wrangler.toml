@@ -6,7 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "fieldmind-db"
-database_id = "placeholder-replace-after-create"
+database_id = "placeholder-replace-after-create" # TODO: Replace with real d1 ID after 'wrangler d1 create fieldmind-db'
 
 [[r2_buckets]]
 binding = "STORAGE"
@@ -14,7 +14,7 @@ bucket_name = "fieldmind-photos"
 
 [[kv_namespaces]]
 binding = "KV"
-id = "placeholder-replace-after-create"
+id = "placeholder-replace-after-create" # TODO: Replace with real kv ID after 'wrangler kv:namespace create fieldmind-kv'
 
 [vars]
 APP_URL = "https://fieldmind.tech"

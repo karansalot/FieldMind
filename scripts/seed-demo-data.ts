@@ -53,7 +53,7 @@ async function seed() {
     const fs = require('fs')
     const path = require('path')
     const tempFile = path.join(__dirname, '..', 'worker', 'seed-temp.sql')
-    fs.writeFileSync(tempFile, queries.join('\\n'))
+    fs.writeFileSync(tempFile, queries.join('\n'))
 
     console.log('Generated SQL file at ' + tempFile)
     console.log('Run the following command to inject the data:')
