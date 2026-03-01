@@ -52,10 +52,10 @@ export default function Home() {
 
           {/* H1 */}
           <h1 className="bebas" style={{ fontSize: 'clamp(56px, 12vw, 120px)', lineHeight: 0.9, marginBottom: 24, letterSpacing: 2 }}>
-            <div style={{ color: '#fff' }}>{t('hero.line1')}</div>
+            <div style={{ color: '#fff', textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>{t('hero.line1')}</div>
             <div>
-              <span style={{ color: '#fff' }}>{t('hero.line2a')} </span>
-              <span style={{ color: '#F0A500' }}>{t('hero.line2b')}</span>
+              <span style={{ color: '#fff', textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}>{t('hero.line2a')} </span>
+              <span className="gradient-text-animated">{t('hero.line2b')}</span>
             </div>
           </h1>
 
